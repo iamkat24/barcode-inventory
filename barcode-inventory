@@ -1,6 +1,119 @@
-git init
-git remote add origin https://github.com/TU_USUARIO/barcode-inventory.git
-git add .
-git commit -m "Subiendo proyecto"
-git branch -M main
-git push -u origin main
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+        input, button {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_AUTH_DOMAIN",
+            projectId: "TU_PROJECT_ID",
+            storageBucket: "TU_STORAGE_BUCKET",
+            messagingSenderId: "TU_MESSAGING_SENDER_ID",
+            appId: "TU_APP_ID"
+        };
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            firebase.initializeApp(firebaseConfig);
+            window.auth = firebase.auth();
+            window.db = firebase.firestore();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Iniciar Sesión</h2>
+        <input type="text" id="firstName" placeholder="Nombre">
+        <input type="text" id="lastName" placeholder="Apellido">
+        <input type="password" id="password" placeholder="Contraseña (1-4)">
+        <button onclick="login()">Ingresar</button>
+    </div>
+    
+    <div class="container">
+        <h2>Escanear Código de Barras</h2>
+        <input type="text" id="barcodeInput" placeholder="Escanea un código" autofocus>
+        <button onclick="addEntry('entrada')">Registrar Entrada</button>
+        <button onclick="addEntry('venta')">Registrar Venta</button>
+        <button onclick="addEntry('despacho')">Registrar Despacho</button>
+    </div>
+    
+    <script>
+        function login() {
+            if (!window.auth) {
+                alert("Firebase aún no ha sido inicializado");
+                return;
+            }
+            
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const password = document.getElementById('password').value;
+            
+            if (password !== "1234") {
+                alert("Contraseña incorrecta");
+                return;
+            }
+            
+            alert(`Bienvenido, ${firstName} ${lastName}`);
+        }
+        
+        function addEntry(type) {
+            if (!window.db) {
+                alert("Firebase aún no ha sido inicializado");
+                return;
+            }
+            
+            const barcode = document.getElementById('barcodeInput').value;
+            if (barcode) {
+                window.db.collection("productos").add({
+                    codigo: barcode,
+                    tipo: type,
+                    fecha: new Date().toISOString()
+                }).then(() => {
+                    alert('Producto registrado');
+                    document.getElementById('barcodeInput').value = '';
+                }).catch(error => {
+                    alert('Error: ' + error.message);
+                });
+            } else {
+                alert('Escanea un código primero');
+            }
+        }
+    </script>
+</body>
+</html>
